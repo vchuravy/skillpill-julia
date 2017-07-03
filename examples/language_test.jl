@@ -22,13 +22,12 @@ end
 
 # This function multiplies a and b into c by using the created C library
 function call_c()
-    a = Cdouble[1.0]
-    b = Cdouble[3.0]
-    c = Cdouble[0.0]
-    ccall((:multiply_, "/home/james/projects/skillpill-julia/examples/c_multiply"),
-       Void,(Ptr{Float64},Ptr{Float64},Ptr{Float64}),a,b,c)
+    a = Cdouble(1.0)
+    b = Cdouble(3.0)
+    c = ccall((:multiply, "/home/james/projects/skillpill-julia/examples/c_multiply"),
+       Cdouble,(Cdouble, Cdouble),a,b)
 
-    println(c[1])
+    println(c)
 
 end
 

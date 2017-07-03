@@ -10,7 +10,7 @@
 
 !! We'll be using subroutines intead of functions (because ehy not?)
 subroutine multiply(A, B, C)
-    double precision A, B, C
+    REAL*8 :: A, B, C
     C = A * B
     return
 end
