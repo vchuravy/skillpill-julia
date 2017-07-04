@@ -84,20 +84,22 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
     \item[0.5]
   \end{description}
 \end{frame}
+
 \begin{frame}{Installation}
   \begin{block}{Windows, Linux, and Mac OSX}
     Download a precompiled version of 0.6 from \url{https://julialang.org/downloads/}
   \end{block}
   \begin{block}{Linux and Mac OSX}
     \begin{enumerate}
-      \item Use your package manager (Mac OSX: \verb|brew cask install julia|)
-      \item Follow the build instructions from \url{https://github.com/JuliaLang/julia}
+      \item Use your package manager (Mac OSX: \texttt{brew cask install julia})
+      \item Follow the build instructions from \url{https://github.com/JuliaLang/julia/}
     \end{enumerate}
   \end{block}
   \begin{block}{Sango and Tombo}
-    OIST has Julia installed on Sango and Tombo, in case the version you need is not there let \email{it-help@oist.jp} know.
-  \end{block{
+    OIST has Julia installed on Sango and Tombo, in case the version you need is not there let \href{mailto:it-help@oist.jp}{it-help@oist.jp} know.
+  \end{block}
 \end{frame}
+
 \begin{frame}{Resources}
   \begin{description}
     \item[Documentation] \url{https://docs.julialang.org/en/release-0.6/}
@@ -228,4 +230,100 @@ julia>
 \begin{frame}{Github}
 \end{frame}
 \section{The foreign world, using Julia to reuse prior work}
+
+\begin{frame}[fragile]{Using Fortran and C in Julia}
+
+Julia allows you to use other languages (such as Fortran or C) by using the \texttt{ccall} function:
+
+\begin{Verbatim}
+    julia> t = ccall((:clock, "libc"), Int32, ())
+    2292761
+\end{Verbatim}
+
+Here, we are calling the \texttt{clock} function from the \texttt{libc} library in C.
+
+\end{frame}
+
+\begin{frame}[fragile]{Your legacy code}
+Let's say you want to use a simply multiply function in Fortran:
+\begin{Verbatim}
+      !! We'll be using subroutines intead of functions 
+      subroutine multiply(A, B, C)
+          REAL*8 :: A, B, C
+          C = A * B
+          return
+      end
+\end{Verbatim}
+\vspace{0.5cm}
+or C:
+\begin{Verbatim}
+    // Nothing fancy here...
+    double multiply(double A, double B){
+        return A*B;
+    }
+\end{Verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Preparing your legacy code}
+
+In order to use your favorite C or Fortran code in Julia, you need to compile it into a library, like so:
+
+\begin{Verbatim}
+    gcc -shared -O2 multiply.c -fPIC -o c_multiply.so
+    gfortran -shared -O2 multiply.f90 -fPIC -o 
+        fortran_multiply.so
+\end{Verbatim}
+
+\pause
+These will create libraries with all of the necessary functions you could want, but beware:
+
+\begin{center}
+\textbf{C and Fortran compilers mangle function names!}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Using your legacy code}
+There are 3 things to keep. Make sure you 
+\begin{enumerate}
+\item Have the right mangled name
+\item Are using the right type
+\item Are using the function correctly.
+\end{enumerate}
+\pause
+
+\vspace{0.5cm}
+For example, in C:
+\begin{Verbatim}
+    # This function multiplies a and b into c by using the 
+    # created C library
+    function call_c()
+        a = Cdouble(1.0)
+        b = Cdouble(3.0)
+        c = ccall((:multiply, "/full/path/to/c_multiply"),
+            Cdouble,(Cdouble, Cdouble),a,b)
+        println(c)
+    end
+\end{Verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Using your legacy code}
+Pointers are okay! For example, in Fortran:
+
+\begin{Verbatim}
+    # This function multiplies a and b into c by using 
+    # the created FORTRAN library
+    function call_fortran()
+        a = Cdouble[1.0]
+        b = Cdouble[2.0]
+        c = Cdouble[0.0]
+        ccall((:multiply_, "/full/path/to/fortran_multiply"),
+           Void,(Ptr{Float64},Ptr{Float64},Ptr{Float64}),
+                 a,b,c)
+        println(c[1])
+    end
+\end{Verbatim}
+
+\pause
+More information can be found here: \url{https://docs.julialang.org/en/stable/manual/calling-c-and-fortran-code/}
+\end{frame}
 \end{document}

@@ -8,7 +8,7 @@
 !!
 !!----------------------------------------------------------------------------!!
 
-!! We'll be using subroutines intead of functions (because ehy not?)
+!! We'll be using subroutines intead of functions (because why not?)
 subroutine multiply(A, B, C)
     REAL*8 :: A, B, C
     C = A * B
