@@ -40,6 +40,26 @@
 \usepackage{hyperref}
 \usepackage{listings}
 
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
@@ -206,7 +226,7 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
 \section{Language syntax and semantics}
 \begin{frame}[fragile]{Variables and datatypes}
   Julia is a dynamic language and so you can simply create variables in any scope.
-  \begin{Verbatim}
+  \begin{lstlisting}
   x = 1   # x will be of type Int64
   y = 1.0 # y will be of type Float64
   z = 1.0 - 2.0im # z will be an Complex{Float64}
@@ -218,7 +238,7 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   """
   'C' # Character literal
   1.0f0 # Float32 literal
-  \end{Verbatim}
+  \end{lstlisting}
   Use \verb|typeof| to check the type of any variable. Variable names can be unicode and so greek symbols can be used.
   In the \verb|REPL| and most editors you can insert them by entering their \LaTeX name and press\verb|[Tab]|.
 \end{frame}
@@ -226,24 +246,19 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   Julia has all the typical conditionals \verb|if|, \verb|else|, \verb|ifelse| which have to end in an \verb|end|.
   Blocks in Julia are not whitespace sensitive and conditionals do not need to be wrapped in round brackets.
 
-  \begin{Verbatim}
+  \begin{lstlisting}
   if rand() < 0.5
     println("Hello there!")
   else
     println("Go away!")
   end
-  \end{Verbatim}
+  \end{lstlisting}
 
 \end{frame}
 \begin{frame}[fragile]{Loops}
   Julia has \verb|for| and \verb|while| loops. A \verb|while| loop takes a condition and a \verb|for| loop takes a iteratior.
-  One can use \verb|break| to break out of a loop and \verb|continue| to skip to the next iteration.
-
-  Noteworthy is that the a \verb|for| loop can take an arbitrary iterator and even desugar tuples.
-  \begin{Verbatim}
-  for x in 1:10
-  end
-
+  One can use \verb|break| to break out of a loop and \verb|continue| to skip to the next iteration. It is noteworthy that a \verb|for| loop can take an arbitrary iterator and even desugar tuples.
+  \begin{lstlisting}
   for (i, x) in enumerate(['A', 'B', 'C'])
     if x == 'B'
       continue
@@ -255,11 +270,11 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
     # ternary operator ?!
     rand() < 0.1 ? break : println("You are trapped!")
   end
-  \end{Verbatim}
+  \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]{Functions and lambdas}
   Julia uses functions not scripts to organise operations. Every function is compiled for the combination of input parameters.
-  \begin{Verbatim}
+  \begin{lstlisting}
   """
       f(x, y)
 
@@ -274,12 +289,12 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   h = (x)-> 1/x
   map(lowercase, ['A', 'B', 'C'])
   map((x)->x+2, [1, 2, 3])
-  \end{Verbatim}
+  \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]{Types}
   Julia's type system allows you to restrict functions to certain types and specialise functions for others.
   You can also create your own types. The names of types are typicaly captialised while functions are lowercase.
-  \begin{Verbatim}
+  \begin{lstlisting}
   abstract type Entity end
   mutable struct Player <: Entity 
     mass::Float64
@@ -289,13 +304,13 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   struct Object <: Entity
     position::Tuple{Float64, Float64}
   end
-  \end{Verbatim}
+  \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]{Multiple dispatch in a nutshell}
   Julia is not an Object-Oriented programming language functions do not belong to an object.
   A function is a set of multiple methods each with their own signatures. When you call a function the most specific methods is executed.
 
-  \begin{Verbatim}
+  \begin{lstlisting}
   function h(x::Number)
     println("x is most definitly a number.")
   end
@@ -305,13 +320,13 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   function h(x::Int8)
     println("Specific method for Int8")
   end
-  \end{Verbatim}
+  \end{lstlisting}
   This becomes really powerful when having multiple argurments and being able to select the most specific method.
 \end{frame}
 \begin{frame}[fragile]{Modules}
   Julia code is organised as modules (namespaces). Module names are capitalised and you can nest modules as well.
 
-  \begin{Verbatim}
+  \begin{lstlisting}
   module MyModule
     export f
 
@@ -319,7 +334,7 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
     f() = println(g())
   end
   using MyModule
-  \end{Verbatim}
+  \end{lstlisting}
 \end{frame}
 \section{The ecosystem}
 \begin{frame}[fragile]{Installing packages}
@@ -327,17 +342,17 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
   and it is customary to refer to them by their full name online, but within Julia you drop the \verb|.jl|.
   So to install the Julia package \verb|Distributions.jl| in the \verb|REPL| just run:
 
-  \begin{Verbatim}
+  \begin{lstlisting}
   Pkg.add("Distributions")
-  \end{Verbatim}
+  \end{lstlisting}
 
   A few other commands:
-  \begin{Verbatim}
+  \begin{lstlisting}
   # Updating the installed packages
   Pkg.update() 
   # What packages are installed?
   Pkg.status()
-  \end{Verbatim}
+  \end{lstlisting}
   In order to create your own packages you have to install \verb|PkgDev.jl|.
 \end{frame}
 \begin{frame}{Github}
@@ -351,10 +366,10 @@ In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into hel
 
 Julia allows you to use other languages (such as Fortran or C) by using the \texttt{ccall} function:
 
-\begin{Verbatim}
+\begin{lstlisting}
     julia> t = ccall((:clock, "libc"), Int32, ())
     2292761
-\end{Verbatim}
+\end{lstlisting}
 
 Here, we are calling the \texttt{clock} function from the \texttt{libc} library in C.
 
@@ -362,33 +377,33 @@ Here, we are calling the \texttt{clock} function from the \texttt{libc} library 
 
 \begin{frame}[fragile]{Your legacy code}
 Let's say you want to use a simply multiply function in Fortran:
-\begin{Verbatim}
+\begin{lstlisting}[language=fortran]
       !! We'll be using subroutines intead of functions 
       subroutine multiply(A, B, C)
           REAL*8 :: A, B, C
           C = A * B
           return
       end
-\end{Verbatim}
+\end{lstlisting}
 \vspace{0.5cm}
 or C:
-\begin{Verbatim}
+\begin{lstlisting}[language=c]
     // Nothing fancy here...
     double multiply(double A, double B){
         return A*B;
     }
-\end{Verbatim}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Preparing your legacy code}
 
 In order to use your favorite C or Fortran code in Julia, you need to compile it into a library, like so:
 
-\begin{Verbatim}
+\begin{lstlisting}
     gcc -shared -O2 multiply.c -fPIC -o c_multiply.so
     gfortran -shared -O2 multiply.f90 -fPIC -o 
         fortran_multiply.so
-\end{Verbatim}
+\end{lstlisting}
 
 \pause
 These will create libraries with all of the necessary functions you could want, but beware:
@@ -409,7 +424,7 @@ There are 3 things to keep. Make sure you
 
 \vspace{0.5cm}
 For example, in C:
-\begin{Verbatim}
+\begin{lstlisting}
     # This function multiplies a and b into c by using the 
     # created C library
     function call_c()
@@ -419,13 +434,13 @@ For example, in C:
             Cdouble,(Cdouble, Cdouble),a,b)
         println(c)
     end
-\end{Verbatim}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Using your legacy code}
 Pointers are okay! For example, in Fortran:
 
-\begin{Verbatim}
+\begin{lstlisting}
     # This function multiplies a and b into c by using 
     # the created FORTRAN library
     function call_fortran()
@@ -437,7 +452,7 @@ Pointers are okay! For example, in Fortran:
                  a,b,c)
         println(c[1])
     end
-\end{Verbatim}
+\end{lstlisting}
 
 \pause
 More information can be found here: \url{https://docs.julialang.org/en/stable/manual/calling-c-and-fortran-code/}
@@ -459,7 +474,7 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
   \end{block}
   \begin{description}
     \item[Next Session] How does the compiler work and how do we get performance.
-    \item[Next Tuesday]
+    \item[Next Tuesday] Data Structures and Algorithms
     \item[Last Session] Parallel computing, threading, GPUs? Up to grabs.
   \end{description}
 \end{frame}
