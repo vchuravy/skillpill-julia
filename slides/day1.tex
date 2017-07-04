@@ -173,11 +173,16 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 julia> 
 
 \end{Verbatim}
+
+In the \verb|REPL| you can use \verb|?| to switch your \verb|REPL| mode into help mode and get information about functions.
   \end{block}
 \end{frame}
 \begin{frame}{IDEs}
-  Juno/Atom
-  VStudioCode
+  There are two main IDEs that are \emph{feature} complete and can be used for Julia. The main one is based on Atom and is called Juno \url{http://junolab.org/}.
+
+  The second one is based on on Visual Studio Code and available at \url{https://marketplace.visualstudio.com/items?itemName=julialang.language-julia}.
+
+  I do not use either of them, but if that is the kind of environment you like and are used to give them a try.
 \end{frame}
 \begin{frame}[fragile]{Jupyter}
   Jupyter is an interactive web-based client for Python, Julia, R and many other languages.
@@ -205,29 +210,140 @@ julia>
   x = 1   # x will be of type Int64
   y = 1.0 # y will be of type Float64
   z = 1.0 - 2.0im # z will be an Complex{Float64}
-  1//2
-  ""
-  ''
-  6.1e6
-
+  1//2 # Rational numbers
+  "This is a String"
+  """
+  This is a multiline
+  String
+  """
+  'C' # Character literal
+  1.0f0 # Float32 literal
   \end{Verbatim}
+  Use \verb|typeof| to check the type of any variable. Variable names can be unicode and so greek symbols can be used.
+  In the \verb|REPL| and most editors you can insert them by entering their \LaTeX name and press\verb|[Tab]|.
 \end{frame}
 \begin{frame}[fragile]{Conditionals}
+  Julia has all the typical conditionals \verb|if|, \verb|else|, \verb|ifelse| which have to end in an \verb|end|.
+  Blocks in Julia are not whitespace sensitive and conditionals do not need to be wrapped in round brackets.
+
+  \begin{Verbatim}
+  if rand() < 0.5
+    println("Hello there!")
+  else
+    println("Go away!")
+  end
+  \end{Verbatim}
+
 \end{frame}
 \begin{frame}[fragile]{Loops}
+  Julia has \verb|for| and \verb|while| loops. A \verb|while| loop takes a condition and a \verb|for| loop takes a iteratior.
+  One can use \verb|break| to break out of a loop and \verb|continue| to skip to the next iteration.
+
+  Noteworthy is that the a \verb|for| loop can take an arbitrary iterator and even desugar tuples.
+  \begin{Verbatim}
+  for x in 1:10
+  end
+
+  for (i, x) in enumerate(['A', 'B', 'C'])
+    if x == 'B'
+      continue
+    end
+    println(i)
+  end
+
+  while true
+    # ternary operator ?!
+    rand() < 0.1 ? break : println("You are trapped!")
+  end
+  \end{Verbatim}
 \end{frame}
 \begin{frame}[fragile]{Functions and lambdas}
+  Julia uses functions not scripts to organise operations. Every function is compiled for the combination of input parameters.
+  \begin{Verbatim}
+  """
+      f(x, y)
+
+  `f` will add two numbers together.
+  """
+  function f(x, y)
+    return x + y
+  end
+
+  g(x) = x^2
+
+  h = (x)-> 1/x
+  map(lowercase, ['A', 'B', 'C'])
+  map((x)->x+2, [1, 2, 3])
+  \end{Verbatim}
 \end{frame}
 \begin{frame}[fragile]{Types}
+  Julia's type system allows you to restrict functions to certain types and specialise functions for others.
+  You can also create your own types. The names of types are typicaly captialised while functions are lowercase.
+  \begin{Verbatim}
+  abstract type Entity end
+  mutable struct Player <: Entity 
+    mass::Float64
+    name::String
+    position::Tuple{Float64, Float64}
+  end
+  struct Object <: Entity
+    position::Tuple{Float64, Float64}
+  end
+  \end{Verbatim}
 \end{frame}
 \begin{frame}[fragile]{Multiple dispatch in a nutshell}
+  Julia is not an Object-Oriented programming language functions do not belong to an object.
+  A function is a set of multiple methods each with their own signatures. When you call a function the most specific methods is executed.
+
+  \begin{Verbatim}
+  function h(x::Number)
+    println("x is most definitly a number.")
+  end
+  function h(x::Integer)
+    println("x is a integer")
+  end
+  function h(x::Int8)
+    println("Specific method for Int8")
+  end
+  \end{Verbatim}
+  This becomes really powerful when having multiple argurments and being able to select the most specific method.
 \end{frame}
 \begin{frame}[fragile]{Modules}
+  Julia code is organised as modules (namespaces). Module names are capitalised and you can nest modules as well.
+
+  \begin{Verbatim}
+  module MyModule
+    export f
+
+    g() = "Internal function"
+    f() = println(g())
+  end
+  using MyModule
+  \end{Verbatim}
 \end{frame}
 \section{The ecosystem}
-\begin{frame}{Installing packages}
+\begin{frame}[fragile]{Installing packages}
+  Julia has an inbuilt package manager called \verb|Pkg|. Julia packages end in \verb|.jl|
+  and it is customary to refer to them by their full name online, but within Julia you drop the \verb|.jl|.
+  So to install the Julia package \verb|Distributions.jl| in the \verb|REPL| just run:
+
+  \begin{Verbatim}
+  Pkg.add("Distributions")
+  \end{Verbatim}
+
+  A few other commands:
+  \begin{Verbatim}
+  # Updating the installed packages
+  Pkg.update() 
+  # What packages are installed?
+  Pkg.status()
+  \end{Verbatim}
+  In order to create your own packages you have to install \verb|PkgDev.jl|.
 \end{frame}
 \begin{frame}{Github}
+  Most of the development of Julia packages and the base language happens on Github.
+
+  Check out \url{https://github.com/JuliaLang/julia} for the main action.
 \end{frame}
 \section{The foreign world, using Julia to reuse prior work}
 
@@ -331,9 +447,9 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
     \item[Python] https://github.com/JuliaPy/PyCall.jl
     \item[R] https://github.com/JuliaInterop/RCall.jl
     \item[C++] https://github.com/Keno/Cxx.jl
-    \item[Matlab] I have heard rumours of such a thing existing, but the horror\cdots
+    \item[Matlab] I have heard rumours of such a thing existing, but the horror $\cdots$
   \end{description}
-  \begin{block}{Fazit}
+  \begin{block}{Conclusion}
     Start writing Julia code now without being worried about losing your prior work!
   \end{block}
 \end{frame}
