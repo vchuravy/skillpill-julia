@@ -94,17 +94,6 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 \end{textblock*}}
 
 \section{Introduction}
-\begin{frame}{A short history of Julia}
-  \begin{description}
-    \item[dawn of time] 
-    \item[0.1]
-    \item[0.2]
-    \item[0.3]
-    \item[0.4]
-    \item[0.5]
-  \end{description}
-\end{frame}
-
 \begin{frame}{Installation}
   \begin{block}{Windows, Linux, and Mac OSX}
     Download a precompiled version of 0.6 from \url{https://julialang.org/downloads/}
@@ -133,9 +122,20 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 
 \subsection{Why does Julia exist}
 \begin{frame}{Why does Julia exist?}
-  Statement: Scientist like high-level programming languages
-  - Why Julia thread on discourse
-  - old blogposts
+  \pause
+  \begin{block}{Hypothesis}
+    \begin{enumerate}
+      \item Scientist like to work in a high productivity programming language. 
+      \item Eventually the problem size will increase and computational intensive
+    \end{enumerate}
+  \end{block}
+\pause
+  The old mission statement is available at \url{https://julialang.org/blog/2012/02/why-we-created-julia} and some good discussion is available at \url{https://discourse.julialang.org/t/julia-motivation-why-werent-numpy-scipy-numba-good-enough/2236} especially Stefan's comment at \url{https://discourse.julialang.org/t/julia-motivation-why-werent-numpy-scipy-numba-good-enough/2236/10}.
+\pause
+  \begin{block}{My personal reason}
+    A fast, elegant, high level language that is fast enough to do serious numerical work on a super computer, while also having a language design that encourages efficient code.
+  \end{block}
+
 \end{frame}
 \subsection{What is wrong with the status quo}
 \begin{frame}{The other contenders}
@@ -154,26 +154,27 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
   This is called the 2+ language problem and Julia is trying to solve that.
 \end{frame}
 
-\begin{frame}{Performance vs Productivity}
-  - Find that slide
-\end{frame}
-
 \begin{frame}{Python and Numpy}
-  Hard to optimize, JIT limited, GIL, fast code needs to be written in C
-  Numpy gets in the way when writting scientific code
+  \begin{itemize}
+    \item Object are essentially dicts and can be changed at runtime.
+    \item The compilers that exist (Numba) only work on primitive types and not user defined ones.
+    \item GIL (Global Interpreter Lock) mask multi-threading hard.
+    \item For fast code you need to write it in C.
+    \item Numpy is great, but awful syntax for math.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Matlab}
-  Only fast for the subst of operation mathworks deemed important
-  Cost
-\end{frame}
-
-\begin{frame}{R}
-  Slow, don't even try to do numerics
+  \begin{itemize}
+    \item It costs alot of money and is not open-source.
+    \item Matlab will only be fast for a subset of operations.
+    \item Matlab tends to hide the computer from the programmer.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{A (biased) performance comparision}
-  Find slide
+  \center
+  \includegraphics[width=\linewidth]{benchmarks}
 \end{frame}
 
 \section{Getting started}
