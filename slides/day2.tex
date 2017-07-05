@@ -211,10 +211,10 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
 \begin{frame}[fragile]{The stages of the compiler}
   \begin{enumerate}
     \item Surface syntax (the code you write)
-    \item Desugared AST |@code\_lowered| 
-    \item Type-inferred AST |@code\_typed|
-    \item LLVM IR |@code\_llvm|
-    \item Native assembly |@code\_native|
+    \item Desugared AST \lstinline{@code\_lowered}
+    \item Type-inferred AST \lstinline{@code\_typed}
+    \item LLVM IR \lstinline{@code\_llvm}
+    \item Native assembly \lstinline{@code\_native}
   \end{enumerate}
 \end{frame}
 \section{Performance}
@@ -226,10 +226,10 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
   \end{block}
   \pause
   \begin{itemize}
-    \item Check for type-instabilities with |@code\_warntype|
-    \item Measure runtime and allocations with |@time|
-    \item Benchmark using |@btime|, and |@benchmark| from |BenchmarkTools.jl|
-    \item Profiler and |ProfileView.jl|
+    \item Check for type-instabilities with \lstinline{@code\_warntype}
+    \item Measure runtime and allocations with \lstinline{@time}
+    \item Benchmark using \lstinline{@btime}, and \lstinline{@benchmark} from \lstinline{BenchmarkTools.jl}
+    \item Profiler and \lstinline{ProfileView.jl}
     \item Memory Allocation tracker
   \end{itemize}
   \pause
@@ -240,8 +240,35 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
 \begin{frame}[fragile]{Using BenchmarksTools.jl}
 \end{frame}
 \begin{frame}[fragile]{Using the Profiler}
+  You can profile a piece of code with Julia's inbuilt profiler.
+  \begin{description}
+    \item[\lstinline{@profile fun()}] Profile a specific function
+    \item[\lstinline{Profile.clear()}] Clear the recorded profile
+    \item[\lstinline{Profile.print()}] Print the profile
+    \item[\lstinline{Profile.print(C=true)}] Print the profile including stacktraces reaching into C.
+  \end{description}
+  \begin{block}{ProfileView.jl}
+    The textual output of the profiler can be hard understand \lstinline{ProfileView.jl} gives a graphical representation.
+    \begin{lstlisting}
+    using ProfileView
+    ProfileView.view()
+    \end{lstlisting}
+  \end{block}
 \end{frame}
 \begin{frame}[fragile]{Using the memory allocation tracker}
+  To track memory allocations you have to start Julia with the memory allocation tracker enabled.
+  \begin{lstlisting}
+  # Track only allocation in user code
+  julia --track-allocation=user
+  # Track allocation in all code (includeing the Julia base)
+  julia --track-allocation=all
+  \end{lstlisting}
+  After quiting Julia *.mem files are created that contain cumulative amounts of allocated memory.
+  \begin{block}{Getting useful data}
+    Since we have to start Julia with track allocations enable we will gather a lot of noisy data.
+    To cut down the noise run your code in a session once and then use \lstinline{Profile.clear\_malloc\_data()}
+    to reset the allocation counts and then run your code again only tracking revelant allocations.
+  \end{block}
 \end{frame}
 \begin{frame}[fragile]{A simple example}
 \begin{lstlisting}
