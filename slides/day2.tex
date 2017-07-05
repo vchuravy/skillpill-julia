@@ -1,0 +1,277 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Modified by Jeremie Gillet in November 2015 to make an OIST Skill Pill template
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+\usetheme{Madrid}
+
+\definecolor{OISTcolor}{rgb}{0.65,0.16,0.16}
+\usecolortheme[named=OISTcolor]{structure}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{textpos} % Use for positioning the Skill Pill logo
+\usepackage{fancyvrb}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[Skill Pill]{Skill Pill: Julia} % The short title appears at the bottom of every slide, the full title is only on the title page
+\subtitle{Lecture 1: Introduction}
+
+\author{James Schloss \and Valentin Churavy} % Your name
+\institute[OIST] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+Okinawa Institute of Science and Technology \\ % Your institution for the title page
+\textit{james.schloss@oist.jp}\\
+\textit{valentin.churavy@oist.jp} % Your email address
+}
+\date{July 7, 2017} % Date, can be changed to a custom date
+
+\begin{document}
+
+\setbeamertemplate{background}{\includegraphics[width=\paperwidth]{SPbackground.png}} % Adding the background logo
+
+\begin{frame}
+\vspace*{1.4cm}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\setbeamertemplate{background}{} % No background logo after title frame
+
+\addtobeamertemplate{frametitle}{}{% Adding the Skill Pill logo on the title screen after title frame
+\begin{textblock*}{100mm}(.92\textwidth,-0.9cm)
+\includegraphics[height=0.85cm]{julia.pdf}
+\end{textblock*}}
+
+\begin{frame}
+  \tableofcontents
+\end{frame}
+\section{The foreign world, using Julia to reuse prior work}
+\begin{frame}[fragile]{Using Fortran and C in Julia}
+
+Julia allows you to use other languages (such as Fortran or C) by using the \texttt{ccall} function:
+
+\begin{lstlisting}
+    julia> t = ccall((:clock, "libc"), Int32, ())
+    2292761
+\end{lstlisting}
+
+Here, we are calling the \texttt{clock} function from the \texttt{libc} library in C.
+
+\end{frame}
+
+\begin{frame}[fragile]{Your legacy code}
+Let's say you want to use a simply multiply function in Fortran:
+\begin{lstlisting}[language=fortran]
+      !! We'll be using subroutines intead of functions 
+      subroutine multiply(A, B, C)
+          REAL*8 :: A, B, C
+          C = A * B
+          return
+      end
+\end{lstlisting}
+\vspace{0.5cm}
+or C:
+\begin{lstlisting}[language=c]
+    // Nothing fancy here...
+    double multiply(double A, double B){
+        return A*B;
+    }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Preparing your legacy code}
+
+In order to use your favorite C or Fortran code in Julia, you need to compile it into a library, like so:
+
+\begin{lstlisting}
+    gcc -shared -O2 multiply.c -fPIC -o c_multiply.so
+    gfortran -shared -O2 multiply.f90 -fPIC -o 
+        fortran_multiply.so
+\end{lstlisting}
+
+\pause
+These will create libraries with all of the necessary functions you could want, but beware:
+
+\begin{center}
+\textbf{C and Fortran compilers mangle function names!}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Using your legacy code}
+There are 3 things to keep. Make sure you 
+\begin{enumerate}
+\item Have the right mangled name
+\item Are using the right type
+\item Are using the function correctly.
+\end{enumerate}
+\pause
+
+\vspace{0.5cm}
+For example, in C:
+\begin{lstlisting}
+    # This function multiplies a and b into c by using the 
+    # created C library
+    function call_c()
+        a = Cdouble(1.0)
+        b = Cdouble(3.0)
+        c = ccall((:multiply, "/full/path/to/c_multiply"),
+            Cdouble,(Cdouble, Cdouble),a,b)
+        println(c)
+    end
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Using your legacy code}
+Pointers are okay! For example, in Fortran:
+
+\begin{lstlisting}
+    # This function multiplies a and b into c by using 
+    # the created FORTRAN library
+    function call_fortran()
+        a = Cdouble[1.0]
+        b = Cdouble[2.0]
+        c = Cdouble[0.0]
+        ccall((:multiply_, "/full/path/to/fortran_multiply"),
+           Void,(Ptr{Float64},Ptr{Float64},Ptr{Float64}),
+                 a,b,c)
+        println(c[1])
+    end
+\end{lstlisting}
+
+\pause
+More information can be found here: \url{https://docs.julialang.org/en/stable/manual/calling-c-and-fortran-code/}
+\end{frame}
+\begin{frame}{Support for other languages}
+  \begin{description}
+    \item[Python] https://github.com/JuliaPy/PyCall.jl
+    \item[R] https://github.com/JuliaInterop/RCall.jl
+    \item[C++] https://github.com/Keno/Cxx.jl
+    \item[Matlab] I have heard rumours of such a thing existing, but the horror $\cdots$
+  \end{description}
+  \begin{block}{Conclusion}
+    Start writing Julia code now without being worried about losing your prior work!
+  \end{block}
+\end{frame}
+
+\section{Macros and metaprogramming}
+\begin{frame}{Macros and metaprogramming}
+\end{frame}
+\section{The Julia compiler}
+\begin{frame}[fragile]{The stages of the compiler}
+  \begin{enumerate}
+    \item Surface syntax (the code you write)
+    \item Desugared AST |@code\_lowered| 
+    \item Type-inferred AST |@code\_typed|
+    \item LLVM IR |@code\_llvm|
+    \item Native assembly |@code\_native|
+  \end{enumerate}
+\end{frame}
+\section{Performance}
+\begin{frame}[fragile]{Methodology}
+  \pause
+  \begin{block}{Measure first}
+    Before you start iterating on your code establish a baseline performance.
+    Computers are noisy system so we use the lowest runtime as a metric.
+  \end{block}
+  \pause
+  \begin{itemize}
+    \item Check for type-instabilities with |@code\_warntype|
+    \item Measure runtime and allocations with |@time|
+    \item Benchmark using |@btime|, and |@benchmark| from |BenchmarkTools.jl|
+    \item Profiler and |ProfileView.jl|
+    \item Memory Allocation tracker
+  \end{itemize}
+  \pause
+  Read the performance tips section of the Julia manual \url{https://docs.julialang.org/en/stable/manual/performance-tips/}
+\end{frame}
+\begin{frame}[fragile]{Type instabilities}
+\end{frame}
+\begin{frame}[fragile]{Using BenchmarksTools.jl}
+\end{frame}
+\begin{frame}[fragile]{Using the Profiler}
+\end{frame}
+\begin{frame}[fragile]{Using the memory allocation tracker}
+\end{frame}
+\begin{frame}[fragile]{A simple example}
+\begin{lstlisting}
+function mysum(A)
+  acc = 0
+  for x in A
+     acc += x
+  end
+  return acc
+end
+\end{lstlisting}
+\end{frame}
+\section{Performance analysis}
+\begin{frame}[fragile]{A supposedly simple task}
+  \begin{lstlisting}
+  function myfun()
+    s = 0.0
+    N = 10000
+    for i=1:N
+        s+=det(randn(3,3))
+    end
+    s/N
+  end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{What is next?}
+  \begin{description}
+    \item[Next Session] Data Structures and Algorithms
+    \item[Last Session] Parallel computing, threading, GPUs? Up to grabs.
+  \end{description}
+\end{frame}
+\end{document}
