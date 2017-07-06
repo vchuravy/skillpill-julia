@@ -61,6 +61,13 @@
   tabsize=3
 }
 
+\newcommand*{\lstitem}[1]{
+  \setbox0\hbox{\lstinline{#1}}  
+  \item[\usebox0]  
+  % \item[\hbox{\lstinline{#1}}]
+  \hfill \\
+}
+
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
@@ -204,18 +211,53 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
   \end{block}
 \end{frame}
 
-\section{Macros and metaprogramming}
-\begin{frame}{Macros and metaprogramming}
-\end{frame}
 \section{The Julia compiler}
 \begin{frame}[fragile]{The stages of the compiler}
   \begin{enumerate}
     \item Surface syntax (the code you write)
-    \item Desugared AST \lstinline{@code\_lowered}
-    \item Type-inferred AST \lstinline{@code\_typed}
-    \item LLVM IR \lstinline{@code\_llvm}
-    \item Native assembly \lstinline{@code\_native}
+    \item Desugared AST \lstinline{@code_lowered}
+    \item Type-inferred AST \lstinline{@code_typed}
+    \item LLVM IR \lstinline{@code_llvm}
+    \item Native assembly \lstinline{@code_native}
   \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile,allowframebreaks]{Macros and metaprogramming}
+  Julia has powerful metaprogramming facilities that allow you to manipulate the AST (abstract syntax tree) of a Julia program.
+  \begin{lstlisting}
+  prog = "1 + 1"
+  ex1 = parse(prog) # Parse a Julia program and return the expression tree
+  # This is equal to manually constructing the expr tree
+  ex2 = Expr(:call, :+, 1, 1)
+  # Or by using quote
+  ex3 = :( 1 + 1) 
+  dump(ex1) # Inspect an expr tree
+  \end{lstlisting}
+  \vspace{-1em}
+  \begin{block}{}
+    The key point here is that Julia code is internally represented as a data structure that is accessible from the language itself.
+  \end{block}
+  \vspace{-1em}
+  \begin{lstlisting}
+  # use eval to execute an expression
+  eval(ex1)
+  \end{lstlisting}
+  \framebreak
+  \begin{block}{Macros}
+    \lstinline{eval} works at runtime and you should avoid it as much as possible. You can use macros to do syntax transformations statically.
+    Macros always start with an \verb|@|.
+  \end{block}
+  \begin{lstlisting}
+  # simplistic implementation of the @assert macro in Julia
+  macro assert(ex)
+      return :( $ex ? nothing : throw(AssertionError($(string(ex)))) )
+  end
+
+  @assert 1 == 1.0
+  @assert 1 == 0
+
+  @macroexpand @assert 1 == 0
+  \end{lstlisting}
 \end{frame}
 \section{Performance}
 \begin{frame}[fragile]{Methodology}
@@ -226,7 +268,7 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
   \end{block}
   \pause
   \begin{itemize}
-    \item Check for type-instabilities with \lstinline{@code\_warntype}
+    \item Check for type-instabilities with \lstinline{@code_warntype}
     \item Measure runtime and allocations with \lstinline{@time}
     \item Benchmark using \lstinline{@btime}, and \lstinline{@benchmark} from \lstinline{BenchmarkTools.jl}
     \item Profiler and \lstinline{ProfileView.jl}
@@ -235,17 +277,45 @@ More information can be found here: \url{https://docs.julialang.org/en/stable/ma
   \pause
   Read the performance tips section of the Julia manual \url{https://docs.julialang.org/en/stable/manual/performance-tips/}
 \end{frame}
+\begin{frame}{About global scope}
+  \begin{block}{Performance tips}
+    A global variable might have its value, and therefore its type, change at any point. This makes it difficult for the compiler to optimize code using global variables. Variables should be local, or passed as arguments to functions, whenever possible.
+
+    Any code that is performance critical or being benchmarked should be inside a function.
+  \end{block}
+  \pause
+  \begin{block}{}
+    The natural unit of compilation is a function. Code in global scope does not get compiled.
+  \end{block}
+\end{frame}
 \begin{frame}[fragile]{Type instabilities}
+  Julia relies on type-inference to generate optimal code, when your code has type-instabilities your code will execute slower.
+  Some of these problems can be fixed by compiler improvements over time, but if you want the fast code now they are best avoided,
+  especially in hot code. Sometimes introduction a function barrier can help generating optimal code.
+  \pause
+  \begin{lstlisting}
+  typeinstable() = rand() < 0.5 ? 1.0 : 1
+  \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]{Using BenchmarksTools.jl}
+  \begin{block}{}
+    BenchmarkTools provides a variety of tools to run benchmark and compare them. See \url{https://github.com/JuliaCI/BenchmarkTools.jl}
+  \end{block}
+  \begin{lstlisting}
+julia> using BenchmarkTools
+julia> @benchmark sin(1)
+julia> @benchmark sum(rand(1000))
+# Interpolate inputs and globals into your benchmark to measure the right thing.
+julia> @benchmark sum(\$(rand(1000)))
+  \end{lstlisting}
 \end{frame}
 \begin{frame}[fragile]{Using the Profiler}
   You can profile a piece of code with Julia's inbuilt profiler.
   \begin{description}
-    \item[\lstinline{@profile fun()}] Profile a specific function
-    \item[\lstinline{Profile.clear()}] Clear the recorded profile
-    \item[\lstinline{Profile.print()}] Print the profile
-    \item[\lstinline{Profile.print(C=true)}] Print the profile including stacktraces reaching into C.
+      \lstitem{@profile fun()} Profile a specific function
+      \lstitem{Profile.clear()} Clear the recorded profile
+      \lstitem{Profile.print()} Print the profile
+      \lstitem{Profile.print(C=true)} Print the profile including stacktraces reaching into C.
   \end{description}
   \begin{block}{ProfileView.jl}
     The textual output of the profiler can be hard understand \lstinline{ProfileView.jl} gives a graphical representation.
