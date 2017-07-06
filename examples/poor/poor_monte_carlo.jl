@@ -9,6 +9,9 @@ type Loc
     y::Array{Float64}
 end
 
+num = 1000
+rad = 1
+
 # this integrates the area of a circle
 pos = Loc([0.0],[0.0])
 count = 0
