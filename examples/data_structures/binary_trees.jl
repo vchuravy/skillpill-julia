@@ -16,26 +16,23 @@ type BTree <: BT
 end
 
 # First, we need to create a type for empty nodes
-type Empty <: BT
-end
-
-et = Empty()
-
+type Empty <: BT end
+const et = Empty()
 
 # Depth-First Search
 function DFS(node::BTree)
     println(node.bitpath)
-    if (node.right != et)
+    if !isa(node.right, Empty)
         #println(0)
         DFS(node.right)
     end
     
-    if (node.left) != et
+    if !isa(node.left, Empty)
         #println(1)
         DFS(node.left)
     end
 
-    if (node.left == et && node.right == et)
+    if isa(node.left, Empty) && isa(node.right, Empty)
         println(node.bitpath)
     end
 end

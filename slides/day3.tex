@@ -84,7 +84,7 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 \textit{valentin.churavy@oist.jp} \\
 \textit{james.schloss@oist.jp} % Your email address
 }
-\date{July 7, 2017} % Date, can be changed to a custom date
+\date{July 11, 2017} % Date, can be changed to a custom date
 
 \begin{document}
 
@@ -180,6 +180,8 @@ type BTree <: BT
     right::BT
 end
 
+type Empty <: BT end
+
 \end{lstlisting}
 \end{frame}
 
@@ -206,11 +208,11 @@ void depth_first_search(node* &node){
 In Julia, this looks like:
 \begin{lstlisting}
 function DFS(node::BTree)
-    if (node.right != et)
+    if !isa(node.right, Empty)
         DFS(node.right)
     end
     
-    if (node.left) != et
+    if !isa(node.left, Empty)
         DFS(node.left)
     end
 end
