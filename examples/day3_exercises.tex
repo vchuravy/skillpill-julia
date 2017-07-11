@@ -1,0 +1,128 @@
+\documentclass[11pt]{article}
+%Gummi|065|=)
+\title{\textbf{Algorithms in Julia}}
+\author{James Schloss}
+\date{}
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+\begin{document}
+\maketitle
+In this document, we have descriptions of the following algorithms:
+\begin{itemize}
+\item Monte Carlo
+\item Convolution / Edge Detection for simple images
+\item Split-Operator method for solving the Schrodinger Equation
+\item Huffman Encoding
+\item Barnes-Hut (N-body galaxy simulation)
+\item Reinforcement Learning
+\end{itemize}
+
+All algorithms can be found in the examples directory of the \texttt{skillpill-julia} repository on github
+
+\newpage
+\section*{Monte Carlo}
+
+There are many different methods that all work under the basic Monte Carlo principle of using random numbers to integrate systems.
+For the sake of time and brevity, please refer to the following link for more information on Monte Carlo Integration: \url{http://leios.github.io/Batman_Montecarlo/}. From there, modify the provided code to work in Julia and to integrate $x^2$ where $-3 < x < 3$.
+
+My function reads in a total range in x along with the number of points to sample. Try to match (or beat) the following benchmark:
+
+\begin{lstlisting}
+julia> @benchmark monte_carlo(6.0, 100000)
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     573.931 μs (0.00% GC)
+  median time:      578.105 μs (0.00% GC)
+  mean time:        596.870 μs (0.00% GC)
+  maximum time:     1.125 ms (0.00% GC)
+  --------------
+  samples:          8326
+  evals/sample:     1
+
+\end{lstlisting}
+
+\newpage
+\section*{Edge Detection}
+This is more about technical implementation than algorithms; however, Canny Edge Detection is a staple algorithm used in many areas -- most importantly image analysis. It is basically composed of 5 steps:
+\begin{enumerate}
+\item Apply Gaussian filter to smooth the image in order to remove the noise
+\item Find the intensity gradients of the image
+\item Apply non-maximum suppression to get rid of spurious response to edge detection
+\item Apply double threshold to determine potential edges
+\item Track edge by hysteresis: Finalize the detection of edges by suppressing all the other edges that are weak and not connected to strong edges.
+\end{enumerate}
+
+For the most part, this edge detection can be done relatively simply with the following code:
+
+\begin{lstlisting}
+# First, we need to use the appropriate packages
+using Images  # All filtering and image stuff
+using ImageView # imshow for showing images, run in REPL
+using TestImages # Standart example images in julia
+
+# simple implementation of canny edge detection using in-built Julia functions
+function simple_edge_detection()
+    img = testimage("fabio_color_256")
+    img_edge = canny(img)
+    save(string("fabio_edges.png"), img_edge)
+end
+
+simple_edge_detection()
+
+\end{lstlisting}
+
+However, that doesn't really show the \textbf{power} of Julia. Perform each of the 5 above steps without using the \texttt{canny} function.
+
+
+\newpage
+\section*{Split-Operator Method}
+The Split-Operator Method is a psuedo-spectral algorithm that is important for many areas of physics, including quantum mechanics, where it is used to solve the Schr\"odinger equation,
+
+$$
+i \hbar \frac{\partial \Psi(\mathbf{r}, t)}{\partial t} = \left[\frac{-\hbar^2}{2m} \nabla^2 + V(\mathbf{r},t) \right] \Psi(\mathbf{r},t)
+$$
+
+To solve this equation, we basically split the 
+
+\newpage
+\section*{Huffman Encoding}
+Huffman encoding is one of the most common methods to compress an encoding string into the smallest number of bits. 
+
+\newpage
+\section*{Force Integration}
+Integrating forces is a staple of any physics engine and most physics simulations. Though there are many different algorithms, here we focus on 
+
+\newpage
+\section*{Barnes-Hut}
+Using the previous section on Force integration, we can take our N-body simulation and speed it up drastically with the help of a rather famous data structure known as an octree (or quadtree in 2d).
+
+\section*{Reinforcement Learning}
+
+\end{document}

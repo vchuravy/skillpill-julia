@@ -14,7 +14,7 @@ function call_fortran()
     a = Cdouble[1.0]
     b = Cdouble[2.0]
     c = Cdouble[0.0]
-    ccall((:multiply_, "/home/james/projects/skillpill-julia/examples/fortran_multiply"),
+    ccall((:multiply_, "/home/james/projects/skillpill-julia/examples/language_test/fortran_multiply"),
        Void,(Ptr{Float64},Ptr{Float64},Ptr{Float64}),a,b,c)
 
     println(c[1])
@@ -24,7 +24,7 @@ end
 function call_c()
     a = Cdouble(1.0)
     b = Cdouble(3.0)
-    c = ccall((:multiply, "/home/james/projects/skillpill-julia/examples/c_multiply"),
+    c = ccall((:multiply, "/home/james/projects/skillpill-julia/examples/language_test/c_multiply"),
        Cdouble,(Cdouble, Cdouble),a,b)
 
     println(c)
