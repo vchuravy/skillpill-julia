@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 %Gummi|065|=)
 \title{\textbf{Algorithms in Julia}}
-\author{James Schloss}
+\author{Valentin Churavy \and James Schloss}
 \date{}
 
 \usepackage{graphicx}
@@ -50,7 +50,7 @@ All algorithms can be found in the examples directory of the \texttt{skillpill-j
 \section*{Monte Carlo}
 
 There are many different methods that all work under the basic Monte Carlo principle of using random numbers to integrate systems.
-For the sake of time and brevity, please refer to the following link for more information on Monte Carlo Integration: \url{http://leios.github.io/Batman_Montecarlo/}. From there, modify the provided code to work in Julia and to integrate $x^2$ where $-3 < x < 3$.
+For the sake of time and brevity, please refer to the following link for more information on Monte Carlo integration: \url{http://leios.github.io/Batman_Montecarlo/}. From there, modify the provided code to work in Julia and to integrate $x^2$ where $-3 < x < 3$.
 
 My function reads in a total range in x along with the number of points to sample. Try to match (or beat) the following benchmark:
 
@@ -60,9 +60,9 @@ BenchmarkTools.Trial:
   memory estimate:  0 bytes
   allocs estimate:  0
   --------------
-  minimum time:     573.931 μs (0.00% GC)
-  median time:      578.105 μs (0.00% GC)
-  mean time:        596.870 μs (0.00% GC)
+  minimum time:     573.931 Î¼s (0.00% GC)
+  median time:      578.105 Î¼s (0.00% GC)
+  mean time:        596.870 Î¼s (0.00% GC)
   maximum time:     1.125 ms (0.00% GC)
   --------------
   samples:          8326
@@ -105,7 +105,7 @@ However, that doesn't really show the \textbf{power} of Julia. Perform each of t
 
 \newpage
 \section*{Split-Operator Method}
-The Split-Operator Method is a psuedo-spectral algorithm that is important for many areas of physics, including quantum mechanics, where it is used to solve the Schr\"odinger equation,
+The Split-Operator Method is a psuedo-spectral method that is important for many areas of physics, including quantum mechanics, where it is used to solve the Schr\"odinger equation,
 
 $$
 i \hbar \frac{\partial \Psi(\mathbf{r}, t)}{\partial t} = \left[\frac{-\hbar^2}{2m} \nabla^2 + V(\mathbf{r},t) \right] \Psi(\mathbf{r},t)
@@ -126,7 +126,7 @@ From here, the method simply involves initializing the wavefunction and then mul
 
 \newpage
 \section*{Julia Fractal}
-Fractals are cool. They are structures that continually repeat themselves no matter how far you zoom in. Because we are using Julia, the obvious fractal to work with is the Julia Fractal. Full implementation details in Python can be found here: \url{https://batchloaf.wordpress.com/2013/02/10/creating-julia-set-images-in-python/}. Basically, all we need to do is iteratively solve the following formula:
+Fractals are cool. They are structures that continually repeat themselves no matter how far you zoom in. Because we are using Julia, the obvious fractal to work with is the Julia fractal. Full implementation details in Python can be found here: \url{https://batchloaf.wordpress.com/2013/02/10/creating-julia-set-images-in-python/}. Basically, all we need to do is iteratively solve the following formula:
 $$z_{n+1} = z_n^2 + c$$
 Every iteration, we reduce pixel color by 5 and recalculate z until either the pixel color is 0 or $|z|$ exceeds a provided cutoff value (somewhat arbitrary). It should be noted here that $c$ is entirely complex and that the value dratically changes the output fractal.
 
@@ -146,9 +146,9 @@ If you want to, you can even combine the images into a gif by using some additio
 
 \newpage
 \section*{Force Integration}
-Integrating forces is a staple of any physics engine and most physics simulations. Though there are many different algorithms, here we focus on the Verlet algorithm (because it's conceptually simple); however, if you want to implement Runge-Kutta4 (or whatever), feel free to do so!
+Integrating forces is a staple of any physics engine and most physics simulations. Though there are many different algorithms to do this, here we focus on the Verlet algorithm (because it's conceptually simple); however, if you want to implement Runge-Kutta (or whatever), feel free to do so!
 
-First, let's start with the Taylor Series Expansion:
+First, let's start with the Taylor Series expansion:
 
 $$x = x_0 + v_0 t + \frac{1}{2}at^2 + \ldots$$
 
