@@ -171,12 +171,13 @@ Basically, each node has parents and children.
 \frametitle{Using simple trees}
 In Julia, the tree nodes might look like:
 \begin{lstlisting}
-typealias BT{T} Union{T,Empty}
+abstract BT 
 
-type BTree
+type BTree <: BT
     weight::Float64
-    left::BT{BTree}
-    right::BT{BTree}
+    bitpath::String
+    left::BT
+    right::BT
 end
 
 \end{lstlisting}

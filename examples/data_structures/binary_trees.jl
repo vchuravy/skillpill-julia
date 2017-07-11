@@ -4,22 +4,23 @@
 #
 #------------------------------------------------------------------------------#
 
+# Now we need a typealias for the tree
+abstract BT 
+
+# Type of Binary Tree
+type BTree <: BT
+    weight::Float64
+    bitpath::String
+    left::BT
+    right::BT
+end
+
 # First, we need to create a type for empty nodes
-type Empty
+type Empty <: BT
 end
 
 et = Empty()
 
-# Now we need a typealias for the tree
-typealias BT{T} Union{T,Empty}
-
-# Type of Binary Tree
-type BTree
-    weight::Float64
-    bitpath::String
-    left::BT{BTree}
-    right::BT{BTree}
-end
 
 # Depth-First Search
 function DFS(node::BTree)
@@ -40,7 +41,7 @@ function DFS(node::BTree)
 end
 
 # Function to create binary tree with a certain number of generations
-function create_BTree(node::BT, gen::Int64, max_gen::Int64, bitpath::String)
+function create_BTree(node::BTree, gen::Int64, max_gen::Int64, bitpath::String)
 
     node.weight = rand()
     node.bitpath = bitpath
