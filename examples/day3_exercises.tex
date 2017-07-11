@@ -4,6 +4,7 @@
 \author{James Schloss}
 \date{}
 
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{color}
@@ -37,9 +38,10 @@ In this document, we have descriptions of the following algorithms:
 \item Monte Carlo
 \item Convolution / Edge Detection for simple images
 \item Split-Operator method for solving the Schrodinger Equation
-\item Huffman Encoding
+\item Julia Fractal
+\item Force Integration
 \item Barnes-Hut (N-body galaxy simulation)
-\item Reinforcement Learning
+\item FFT
 \end{itemize}
 
 All algorithms can be found in the examples directory of the \texttt{skillpill-julia} repository on github
@@ -109,20 +111,77 @@ $$
 i \hbar \frac{\partial \Psi(\mathbf{r}, t)}{\partial t} = \left[\frac{-\hbar^2}{2m} \nabla^2 + V(\mathbf{r},t) \right] \Psi(\mathbf{r},t)
 $$
 
-To solve this equation, we basically split the 
+To solve this equation, we basically split the time evolution operator ($\hat U = e^{-i \hat H t / \hbar}$) into 2 via the Baker-Campbell-Hausdorff relation:
+$$\hat U_k = e^{-\mathbf{\hat p}^2 t / 2} \quad \hat U_V = e^{-V_0(\mathbf{\hat r})t/2}$$
+
+From here, the method simply involves initializing the wavefunction and then multiplying it by half of $\hat U_V$ before flipping to momentum space via a FFT and multiplying it by all of $\hat U_k$ and then flipping back to real space with an inverse FFT and multiplying by the other half of $\hat U_V$, as shown in figure \ref{fig:split-op}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{split-op.png}
+\end{center}
+\caption{A single step in the split-op method as described in the description}
+\label{fig:split-op}
+\end{figure}
 
 \newpage
-\section*{Huffman Encoding}
-Huffman encoding is one of the most common methods to compress an encoding string into the smallest number of bits. 
+\section*{Julia Fractal}
+Fractals are cool. They are structures that continually repeat themselves no matter how far you zoom in. Because we are using Julia, the obvious fractal to work with is the Julia Fractal. Full implementation details in Python can be found here: \url{https://batchloaf.wordpress.com/2013/02/10/creating-julia-set-images-in-python/}. Basically, all we need to do is iteratively solve the following formula:
+$$z_{n+1} = z_n^2 + c$$
+Every iteration, we reduce pixel color by 5 and recalculate z until either the pixel color is 0 or $|z|$ exceeds a provided cutoff value (somewhat arbitrary). It should be noted here that $c$ is entirely complex and that the value dratically changes the output fractal.
+
+Create the following: 
+\begin{enumerate}
+\item A function that sweeps through different $c$ values and outputs an image for each value
+\item A function that zooms into a fractal of $c=1.0$ to see it's self-similar nature
+\end{enumerate}
+
+If you want to, you can even combine the images into a gif by using some additional tool (like ffmpeg)
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.45\textwidth]{fractal_zoom00030.png}
+\includegraphics[width=0.45\textwidth]{c_scan00030.png}
+\end{center}
+\end{figure}
 
 \newpage
 \section*{Force Integration}
-Integrating forces is a staple of any physics engine and most physics simulations. Though there are many different algorithms, here we focus on 
+Integrating forces is a staple of any physics engine and most physics simulations. Though there are many different algorithms, here we focus on the Verlet algorithm (because it's conceptually simple); however, if you want to implement Runge-Kutta4 (or whatever), feel free to do so!
+
+First, let's start with the Taylor Series Expansion:
+
+$$x = x_0 + v_0 t + \frac{1}{2}at^2 + \ldots$$
+
+If we are looking for $x(t + \Delta t)$, we can start by looking at the timesteps immediately before it:
+$$x(t+\Delta t) = x(t) + v \cdot \Delta t + \frac{1}{2} a\cdot\Delta t^2$$
+$$x(t-\Delta t) = x(t) - v \cdot \Delta t + \frac{1}{2} a\cdot\Delta t^2$$
+
+Adding these together and solving for $x(t + \Delta t)$, we get:
+
+$$x(t + \Delta t) = 2x(t) - x(t - \Delta t) + a \Delta t^2$$
+
+This means we can solve for any object's new position if we know it's acceleration and where it's been! Of course, if we need the velocity (possibly to solve for the acceleration of a damped system), we can find it with:
+
+$$v(t) = \frac{x(t + \Delta t) - x(t - \Delta t)}{2\Delta t}$$
+
+Now, let's integrate some forces! Start with a ball at a height of 5m. How long does it take to hit the ground? Also, plot it's trajectory with time.
 
 \newpage
 \section*{Barnes-Hut}
-Using the previous section on Force integration, we can take our N-body simulation and speed it up drastically with the help of a rather famous data structure known as an octree (or quadtree in 2d).
+Using the previous section on force integration, we know that all we really need for an N-body gravity simulator is a method to calculate the acceleration of an object in space. In principle, this is straightforward: We just add up all the particles and calculate
 
-\section*{Reinforcement Learning}
+$$a = \frac{GMm}{r^2}$$
+
+In practice, this means that we have an $O(n^2)$ problem on our hands! That said, we can take our N-body simulation and speed it up drastically with the help of a rather famous data structure known as an octree (or quadtree in 2d).
+
+These data structures are straightforward. The root node is the entire simulation box, it's children are the octants of that box. Each octant has 8 octchildren, and we keep splitting up the simulation until every particle has it's own box. At this point, it's not obvious how this speed anything up; however, each box has a Center of Mass equal to all the elements on the inside of it. If our objects are sufficiently far away from each other, we can take a larger parent box instead of a smaller child box. This cuts computational time tremendously!
+
+In particular, the cutoff value is defined as $\theta = s/d$ where $s$ is the width of the region represented by the internal node and $d$ is the distance between the body and it's Center of Mass. By playing with $\theta$, we can have either a fast, inaccurate simulation or a slow, accurate one. The trick is finding the happy-medium between the two!
+
+\newpage
+\section*{FFT}
+FFT's are everywhere nowadays. In fact, we used it previously in this document when talking about the Split-Operator method. For the most part, FFT's use an implementation of the Cooley-Tukey algorithm, which basically involves recursively dividing the array we wish to transorm into even and odd components and solving them with a slow Discrete Fourier Transform (DFT) when we get below a certain number of elements. 
+
+By solving our system recursively, we can take an $O(n^2)$ process to $(n\log n)$, which is hughe savings! Full implementation details can be found here: \url{https://leios.gitbooks.io/algorithm-archive/content/chapters/computational_mathematics/cooley_tukey.html} (you might need to refresh the page to get the formulas to work)
 
 \end{document}
