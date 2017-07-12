@@ -153,10 +153,26 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 
 \begin{frame}[fragile]{SIMD and loops}
   \begin{lstlisting}
+  function add(out, x, y)
+    for i in 1:length(out)
+      out[i] = x[i] + y[i]
+    end
+  end
+  \end{lstlisting}
+
+  \begin{block}{Observation}
+    Each loop iteration is independent.
+  \end{block}
+  \begin{enumerate}
+    \item Learn about \lstinline{@inbounds}
+  \end{enumerate}
+\end{frame}
+\begin{frame}[fragile]{Reductions and loop-dependencies}
+  \begin{lstlisting}
   function sum(x)
     acc = 0.0
-    for i in 1:length(a)
-       acc += x
+    for i in 1:length(x)
+       acc += x[i]
     end
   end
   \end{lstlisting}
@@ -167,7 +183,7 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
     The compiler cannot vectorise this loop, without changing the semantics.
   \end{block}
   \begin{enumerate}
-    \item Learn about \lstinline{@inline} and \lstinline{@simd}
+    \item Learn about \lstinline{@simd}
   \end{enumerate}
 \end{frame}
 \begin{frame}[fragile]{Explicit SIMD}
