@@ -114,7 +114,7 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
       \item SIMD.jl
       \item MPI.jl
       \item DistributedArrays.jl
-      \item 
+      \item CUDAnative.jl if your computer has a NVidia GPU
     \end{itemize}
   \end{block}
 \end{frame}
@@ -128,14 +128,65 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 \end{frame}
 
 \section{Instruction level parallelism}
-\begin{frame}
-  Simple example of pipelining of independent instructions that vectorises with -03
+\begin{frame}[fragile]{What is instruction level parallelism}
+
+  \begin{lstlisting}
+  function padd(a, b, x, y)
+    c = a + b
+    z = x + y
+    return c, z
+  end
+  \end{lstlisting}
+
+  \begin{block}{Observation}
+     The two operations are independent of each other and we could execute them in parallel.
+  \end{block}
+
+  \begin{enumerate}
+    \item Use \lstinline{@code_llvm} and \lstinline{@code_native} to understand what is happening
+    \item Establish a baseline performance with \lstinline{@benchmark}
+    \item Start Julia with \lstinline{julia -O3}
+    \item Compare the llvm and native code and your benchmark results
+    \item Note that there is next to no performance benefit in this example, but that changes once you scale up
+  \end{enumerate}
 \end{frame}
-\begin{frame}
-  Loop based simd and @simd
+
+\begin{frame}[fragile]{SIMD and loops}
+  \begin{lstlisting}
+  function add!(out, a, b)
+    @assert length(a) == length(b)
+    @assert length(a) == length(out)
+
+    for i in 1:length(a)
+       out[i] = a[i] + b[i]
+    end
+  end
+  \end{lstlisting}
+  \begin{block}{Observation}
+    Each loop iteration is independent from each other.
+  \end{block}
+  \begin{enumerate}
+    \item Learn about \lstinline{@inline} and \lstinline{@simd}
+    \item Note that LLVM will vectorise this loop even without \lstinline{@simd}
+  \end{enumerate}
 \end{frame}
-\begin{frame}{}
-  Explicit simd
+\begin{frame}[fragile]{Explicit SIMD}
+  \begin{block}{SIMD.jl}
+    Instead of relying on the compiler to optimise and vectorise our code correctly we can also write explicit SIMD code.
+  \end{block}
+  \begin{lstlisting}
+  using SIMD
+  function add(out::Vector{Float64}, x::Vector{Float64}, y::Vector{Float64})
+    # My laptop supports AVX 256bit 4xFloat64
+    @assert length(x) % 4 == 0
+    for i in 1:4:length(x)
+      vx = vload(Vec{4, Float64}, x, i)
+      vy = vload(Vec{4, Float64}, y, i)
+      vo = vx + vy
+      vstore(vo, out, i)
+    end
+  end
+  \end{lstlisting}
 \end{frame}
 \section{Threading}
 \begin{frame}
