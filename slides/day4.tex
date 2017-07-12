@@ -153,21 +153,21 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
 
 \begin{frame}[fragile]{SIMD and loops}
   \begin{lstlisting}
-  function add!(out, a, b)
-    @assert length(a) == length(b)
-    @assert length(a) == length(out)
-
+  function sum(x)
+    acc = 0.0
     for i in 1:length(a)
-       out[i] = a[i] + b[i]
+       acc += x
     end
   end
   \end{lstlisting}
   \begin{block}{Observation}
-    Each loop iteration is independent from each other.
+    Is each loop iteration independent from each other? Yes and no.
+    Standard addition is associative and the order of operations has no impact.
+    Floating-point addition is non-associative and the order of operations is important.
+    The compiler cannot vectorise this loop, without changing the semantics.
   \end{block}
   \begin{enumerate}
     \item Learn about \lstinline{@inline} and \lstinline{@simd}
-    \item Note that LLVM will vectorise this loop even without \lstinline{@simd}
   \end{enumerate}
 \end{frame}
 \begin{frame}[fragile]{Explicit SIMD}
