@@ -205,24 +205,75 @@ Okinawa Institute of Science and Technology \\ % Your institution for the title 
   \end{lstlisting}
 \end{frame}
 \section{Threading}
-\begin{frame}
-  Explain current fork join model and caveats
+\begin{frame}{Fork-Join model}
+  \begin{block}{Caveat}
+    Julia threading model is based on a fork-join approach and is still considered experimental.
+    The Julia developers are working with Intel on bringing a modern and full-fledged threading model to Julia for 1.0
+  \end{block}
+  \pause
+  \begin{block}{What is fork-join}
+    Fork-join describes the control flow that a group of threads undergo. Execution is forked across to all threads and at a later point execution is joined together. In Julia all threads have to execute the same lambda.
+  \end{block}
 \end{frame}
-\begin{frame}
-  Simple example
+\begin{frame}[fragile]
+  Start Julia with \lstinline{JULIA_NUM_THREADS=4 julia} the number of threads needs to be set before starting Julia.
+
+  \begin{lstlisting}
+  using Base.Threads
+
+  a = zeros(nthreads()*10)
+  @threads for i in 1:length(a)
+    a[i] = threadid()
+  end
+  \end{lstlisting}
+  \begin{block}{Caveats}
+    Special care needs to be taken for access to global state, which includes IO and random numbers.
+  \end{block}
 \end{frame}
-\begin{frame}
-  complex example with loop splitting, random etc...
+\begin{frame}[fragile]{Further examples}
+  \begin{lstlisting}
+  A = zeros(10_000)
+  @threads for i in 1:length(A)
+    A[i] = rand() # Note rand uses a global variable Base.GLOBAL_RNG
+  end
+
+  rngs = [MersenneTwister(rand(UInt64)) for i in 1:nthreads()]
+  @threads for i in 1:length(A)
+    A[i] = rand(rngs[threadid()])
+  end
+  \end{lstlisting}
 \end{frame}
-\begin{frame}
-  Atomics
+\begin{frame}[fragile]{Support for Atomics}
+  \begin{lstlisting}
+  acc = 0
+  @threads for i in 1:10_000
+    acc += 1
+  end
+  \end{lstlisting}
+  \begin{block}{}
+    To prevent the datarace we can use Atomics to ensure read-write consistency.
+  \end{block}
+  \begin{lstlisting}
+  acc = Atomic{Int64}(0)
+  @threads for i in 1:10_000
+    atomic_add!(acc, 1)
+  end
+  \end{lstlisting}
 \end{frame}
 \section{Distributed}
-\begin{frame}
-  MPI
+\begin{frame}{MPI}
+  \begin{block}{}
+    Julia supports MPI through \lstinline{MPI.jl}. If you are comfortable with MPI you can use it with very low overhead.
+  \end{block}
 \end{frame}
-\begin{frame}
-  DistibutedArrays
+\begin{frame}{Parallel programming}
+  Starting Julia with \lstinline{julia -p 4} will create one master process and four worker processes. You can use remotecalls to execute work on a worker and to get back the results. Based on this \lstinline{DistributeArrays.jl} provides a powerful global array interface.
+  \lstinline{@everywhere} will execute a piece of code on all processes.
 \end{frame}
 \section{CUDAnative}
+\begin{frame}{CUDAnative}
+  \begin{block}{CUDAnative}
+    A recent development is the ability to write raw CUDA code in Julia! Learn more about it at \url{https://github.com/JuliaGPU/CUDAnative.jl}
+  \end{block}
+\end{frame}
 \end{document}
