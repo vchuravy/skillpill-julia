@@ -5,7 +5,7 @@
 #------------------------------------------------------------------------------#
 
 # We will need a few libraries for visualization
-using Images, ImageView
+using PyPlot
 
 # Function to calculate and output julia fractal to image
 function create_fractal(cutoff::Float64, step::Float64, c_val::Float64, 
@@ -40,7 +40,11 @@ function c_scan(cutoff::Float64, step::Float64, res::Int64,
     for i = 0:c_step:max_c
         println(i)
         carr = create_fractal(cutoff, step, i, res, range)
-        save(string("c_scan", lpad(id, 5, 0), ".png"), carr)
+        figure(figsize = (10,10))
+        imshow(carr, cmap=ColorMap("Blues"))
+        subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
+                        hspace = 0, wspace = 0)
+        savefig(string("c_scan", lpad(id, 5, 0), ".png"))
         id += 1
     end
 end
@@ -54,7 +58,11 @@ function fractal_zoom(cutoff::Float64, step::Float64, c_val::Float64,
     while range > min_range
         println(range)
         carr = create_fractal(cutoff, step, c_val, res, range)
-        save(string("fractal_zoom", lpad(id, 5, 0), ".png"), carr)
+        figure(figsize = (10,10))
+        imshow(carr, cmap=ColorMap("Blues"))
+        subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
+                        hspace = 0, wspace = 0)
+        savefig(string("fractal_zoom", lpad(id, 5, 0), ".png"))
         id += 1
         range -= range*0.05
     end
@@ -62,4 +70,4 @@ end
 
 fractal_zoom(10.0, 0.1, 1.0, 1024, 1.0, 0.0001)
 
-c_scan(10.,5., 1024, 3.0, 1.0, 0.025)
+#c_scan(10.,5., 1024, 3.0, 1.0, 0.025)
